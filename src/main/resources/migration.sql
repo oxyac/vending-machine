@@ -1,0 +1,11 @@
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
+INSERT INTO product(name, price, stock) VALUES('Chicken Nugget', 9.99, 20);
