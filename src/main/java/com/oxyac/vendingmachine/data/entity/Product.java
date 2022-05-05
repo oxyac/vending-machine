@@ -1,10 +1,11 @@
 package com.oxyac.vendingmachine.data.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "product")
-public class Product {
+public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -13,6 +14,17 @@ public class Product {
     private String name;
     private Double price;
     private Integer stock;
+
+    private String imageFullPath;
+
+
+    public String getImageFullPath() {
+        return imageFullPath;
+    }
+
+    public void setImageFullPath(String imageFullPath) {
+        this.imageFullPath = imageFullPath;
+    }
 
     public Product(String name, Double price, Integer stock) {
         this.name = name;
