@@ -1,4 +1,4 @@
-package com.oxyac.vendingmachine.data;
+package com.oxyac.vendingmachine.rest.controller;
 
 import com.oxyac.vendingmachine.data.entity.Product;
 import com.oxyac.vendingmachine.data.service.ProductService;

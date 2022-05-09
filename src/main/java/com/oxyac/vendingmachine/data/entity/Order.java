@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 public class Order {
 
     public Order() {
@@ -21,13 +21,13 @@ public class Order {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
 
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDateTime date;
+    private LocalDate date;
 
 
     private Long customerId;
@@ -83,11 +83,11 @@ public class Order {
         return sum;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
