@@ -1,13 +1,16 @@
 package com.oxyac.vendingmachine.rest.controller;
 
 import com.oxyac.vendingmachine.data.entity.Product;
-import com.oxyac.vendingmachine.data.service.ProductService;
+import com.oxyac.vendingmachine.service.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200/", maxAge = 3600)
 @RestController
+@Slf4j
 public class ProductController {
 
     @Autowired
@@ -16,6 +19,7 @@ public class ProductController {
     @GetMapping("/products")
     private List<Product> getProducts(){
 
+        log.info("incoming get");
         return departmentService.findAll();
     }
 

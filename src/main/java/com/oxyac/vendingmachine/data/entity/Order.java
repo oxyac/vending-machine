@@ -17,7 +17,7 @@ public class Order {
     }
 
     public enum TransactionState {
-        AWAITING_VALIDATION, VALIDATED, REFUSED
+        IN_PROGRESS, DONE
     }
 
     @Id

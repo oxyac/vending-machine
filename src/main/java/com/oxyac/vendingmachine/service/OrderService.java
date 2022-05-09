@@ -1,17 +1,17 @@
-package com.oxyac.vendingmachine.data.service;
+package com.oxyac.vendingmachine.service;
 
 import com.oxyac.vendingmachine.data.entity.Order;
 import com.oxyac.vendingmachine.data.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
+@Service
 public class OrderService implements IOrderService{
 
+    @Autowired
     private OrderRepository orderRepository;
-
-    public OrderService(OrderRepository orderRepository) {
-    }
 
     @Override
     public Iterable<Order> getAllOrders() {

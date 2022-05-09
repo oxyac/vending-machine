@@ -1,4 +1,4 @@
-package com.oxyac.vendingmachine.data.service;
+package com.oxyac.vendingmachine.service;
 
 import com.oxyac.vendingmachine.data.entity.Order;
 
