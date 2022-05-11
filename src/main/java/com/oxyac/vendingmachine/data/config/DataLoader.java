@@ -18,12 +18,12 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void loadProductData() {
-        if (productRepository.count() == 0) {
-            Product user1 = new Product("Chicken", 9.99, 20 );
-            Product user2 = new Product("Chicken", 9.99, 20  );
-            productRepository.save(user1);
-            productRepository.save(user2);
-        }
-        System.out.println(productRepository.count());
+//        if (productRepository.count() == 0) {
+//            Product user1 = new Product("Chicken", 9.99, 20 );
+//            Product user2 = new Product("Chicken", 9.99, 20  );
+//            productRepository.save(user1);
+//            productRepository.save(user2);
+//        }
+//        System.out.println(productRepository.count());
     }
 }
