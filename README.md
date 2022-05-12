@@ -1,14 +1,27 @@
 Vending Machine Software - Optimal Solutions Hub SRL Test Project
 
-service setup as follows:
+JSON sample for /loadStock route:
 
-$ docker container run -d --name=pg -p 5433:5432 --user $(id -u):$(id -g) -e POSTGRES_PASSWORD=password -e PGDATA=/pgdata -v /home/og/Projects/java/vending-machine/pgdata:/pgdata postgres:latest
+{
+"config": {
+"rows": 4,
+"columns": 8 },
+"items": [{
+"col": 2,
+"row": "B",
+"name": "Snickers",
+"amount": 10,
+"price": 135 }, {
+"col": 3,
+"row": "B",
+"name": "Hersheys",
+"amount": 10,
+"price": 225 }, {
+"col": 4,
+"row": "B",
+"name": "Hersheys",
+"amount": 0,
+"price": 225 }
+]
+}
 
-$ docker exec -it pg bash
-$ su postgres
-$ psql
-
-
-psql> CREATE DATABASE md_oxyac_store;
-CREATE USER og WITH ENCRYPTED PASSWORD 'password';
-GRANT ALL PRIVILEGES ON DATABASE md_oxyac_store TO og;

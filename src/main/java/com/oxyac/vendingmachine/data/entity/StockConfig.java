@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class StockConfig {
 
-    private Integer rows;
+    private String rows;
     private Integer columns;
 
 }
