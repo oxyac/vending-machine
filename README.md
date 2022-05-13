@@ -4,7 +4,7 @@ I developed this API using Spring Framework and some of its common utilities, su
 The application is not coupled to a database, but can easily be configured using the docker image below.
 
 
-#### REQUIRED STEPS TO DEPLOY LOCALY:
+#### REQUIRED STEPS TO DEPLOY LOCALLY:
 
 
 
