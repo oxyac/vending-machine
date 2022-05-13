@@ -91,11 +91,11 @@ gradle wrapper --gradle-version 6.0.1
 
 - Fetch image
 
-> $docker container run -d --name=pg -p 5433:5432 --user $(id -u):$(id -g) -e POSTGRES_PASSWORD=password -e PGDATA=/pgdata -v /home/og/Projects/java/vending-machine/pgdata:/pgdata postgres:latest
+> docker container run -d --name=pg -p 5433:5432 --user $(id -u):$(id -g) -e POSTGRES_PASSWORD=password -e PGDATA=/pgdata -v /home/og/Projects/java/vending-machine/pgdata:/pgdata postgres:latest
 
 - Access the container:
 
 > docker exec -it pg bash
-> su postgres
-> psql
+
+> su postgres && psql
 
