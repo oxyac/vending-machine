@@ -1,20 +1,18 @@
 package com.oxyac.vendingmachine.util;
 
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-
-
+@Slf4j
 @Component
 public class StringToLongConverter implements Converter<String, Long> {
     @Override
     public Long convert(String source) {
-        String value = source.replaceAll("[^0-9]","");
-        return Long.parseLong(value);
-    }
 
-    public BigDecimal convertToString(Long amount){
-        return new BigDecimal(amount).movePointLeft(2);
+        String value = source.replaceAll("[^0-9]","");
+        log.info(source + "__convertTo__" + value);
+        return Long.parseLong(value);
     }
 }

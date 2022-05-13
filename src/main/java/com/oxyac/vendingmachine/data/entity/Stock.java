@@ -1,14 +1,12 @@
-package com.oxyac.vendingmachine.rest.repr;
+package com.oxyac.vendingmachine.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oxyac.vendingmachine.data.entity.Item;
-import com.oxyac.vendingmachine.data.entity.StockConfig;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class StockForm {
+public class Stock {
     @JsonProperty
     private StockConfig config;
     @JsonProperty

@@ -1,20 +1,18 @@
 package com.oxyac.vendingmachine.service;
 
-import com.oxyac.vendingmachine.rest.repr.StockForm;
+import com.oxyac.vendingmachine.data.entity.Stock;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class StockService {
 
-    private StockForm stock;
+    private Stock stock;
 
-    public StockForm getStock() {
+    public Stock getStock() {
         return this.stock;
     }
 
-    public void setStock(StockForm stock) {
+    public void setStock(Stock stock) {
         this.stock = stock;
     }
 }

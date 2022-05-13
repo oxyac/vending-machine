@@ -1,59 +1,62 @@
 package com.oxyac.vendingmachine.rest.controller;
 
 
-import com.oxyac.vendingmachine.data.dto.MachineResponseDto;
-import com.oxyac.vendingmachine.data.dto.WelcomeDto;
-import com.oxyac.vendingmachine.data.entity.Item;
-import com.oxyac.vendingmachine.data.entity.VendingMachine;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
 import com.oxyac.vendingmachine.data.exception.LowBalanceException;
 import com.oxyac.vendingmachine.data.exception.StockEmptyException;
-import com.oxyac.vendingmachine.rest.repr.StockForm;
-import com.oxyac.vendingmachine.service.ITransactionService;
 import com.oxyac.vendingmachine.service.IVendingMachineService;
-import com.oxyac.vendingmachine.util.StringToLongConverter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.oxyac.vendingmachine.util.LongToBigDecimalConverter;
+import com.oxyac.vendingmachine.data.dto.MachineResponseDto;
+import com.oxyac.vendingmachine.service.ITransactionService;
+import com.oxyac.vendingmachine.data.entity.VendingMachine;
+import com.oxyac.vendingmachine.data.dto.WelcomeDto;
+import com.oxyac.vendingmachine.data.entity.Stock;
+import com.oxyac.vendingmachine.data.dto.StockDto;
+import com.oxyac.vendingmachine.data.entity.Item;
 import org.springframework.web.bind.annotation.*;
-
 import javax.persistence.EntityNotFoundException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.*;
 
 @RestController
 @Slf4j
 public class VendingMachineController {
 
-    private final IVendingMachineService stockService;
-    private final StringToLongConverter stringToLongConverter;
+    private final IVendingMachineService vendingMachineService;
+    public final LongToBigDecimalConverter longToBigDecimalConverter;
 
-    public VendingMachineController(IVendingMachineService stockService, StringToLongConverter stringToLongConverter) {
-        this.stockService = stockService;
-        this.stringToLongConverter = stringToLongConverter;
+    public VendingMachineController(IVendingMachineService vendingMachineService, LongToBigDecimalConverter longToBigDecimalConverter) {
+        this.vendingMachineService = vendingMachineService;
+        this.longToBigDecimalConverter = longToBigDecimalConverter;
     }
 
 
     @RequestMapping("/loadStock")
-    public ResponseEntity<WelcomeDto> reStock(@RequestBody StockForm stockForm) {
+    public ResponseEntity<WelcomeDto> reStock(@RequestBody StockDto stockDto) {
 
-        stockService.loadStock(stockForm);
+        Stock stock = vendingMachineService.loadStock(stockDto);
 
         HashMap<String, String> routes = new HashMap<>();
 
         routes.put("/getStock", "Return all item info");
-        routes.put("/loadStock", "Load new products into vending machine");
+        routes.put("/loadStock", "Load and parse JSON containing new products");
         routes.put("/selection&row={B}&col={2}", "Returns item info");
         routes.put("/deposit&amount={225}", "Deposit coins into machine");
         routes.put("/purchase&row={B}&col={2}", "Make a purchase with deposited money");
 
-        WelcomeDto welcome = new WelcomeDto(routes, "Here is a description of all available routes");
+
+        WelcomeDto welcome = new WelcomeDto("Here is a description of all available routes", routes, stock);
+
         return ResponseEntity.ok(welcome);
     }
 
     @RequestMapping("/getStock")
-    public ResponseEntity<StockForm> getStock() throws InventoryNullException {
+    public ResponseEntity<Stock> getStock() throws InventoryNullException {
 
-        return ResponseEntity.ok(stockService.getStock());
+        return ResponseEntity.ok(vendingMachineService.getStock());
 
     }
 
@@ -63,7 +66,7 @@ public class VendingMachineController {
         log.info(row);
         log.info(String.valueOf(col));
 
-        Item item = stockService.findByRowCol(row, col);
+        Item item = vendingMachineService.findByRowCol(row, col);
 
         if(item == null){
             log.info("not found");
@@ -78,36 +81,16 @@ public class VendingMachineController {
 
     @RequestMapping(value = "/purchase", method = RequestMethod.GET)
     public ResponseEntity<MachineResponseDto> purchaseProduct(@RequestParam String row,
-                                                            @RequestParam Integer col) throws Exception {
+                                                              @RequestParam Integer col) throws Exception {
 
-        log.info(row);
-        log.info(String.valueOf(col));
+        log.info("ROW:__"+row+"COL:__"+ col);
 
+        Item desiredItem = vendingMachineService.findByRowCol(row, col);
 
-        Item item = stockService.findByRowCol(row, col);
+        MachineResponseDto responseDto = vendingMachineService.processTransaction(desiredItem);
 
-        VendingMachine vendingMachine = stockService.getVendingMachine();
+        log.info("TRANSACTION_SUCCESS_FOR_ITEM:___" + desiredItem.toString());
 
-        Long balance = vendingMachine.getDepositedAmount();
-
-
-        if(item == null){
-            log.info("not found");
-            throw new EntityNotFoundException("-X GET /getStock");
-        }
-
-        if(item.getAmount() == 0){
-            throw new StockEmptyException("Rupture de stock.");
-        }
-
-        if(balance < item.getPrice()) {
-            Long amountLeft = item.getPrice() - balance;
-            throw new LowBalanceException("Insufficient funds. Introduce " +
-                    stringToLongConverter.convertToString(amountLeft) + "$");
-        }
-
-        log.info(item.toString());
-        MachineResponseDto responseDto = ITransactionService.confirmPurchase(vendingMachine, item, balance);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
 
@@ -119,7 +102,7 @@ public class VendingMachineController {
 
         log.info(String.valueOf(amount));
 
-        Long moneyDeposited = stockService.depositCoin(amount);
+        Long moneyDeposited = vendingMachineService.depositCoin(amount);
 
         return new ResponseEntity<>(moneyDeposited, HttpStatus.OK);
 

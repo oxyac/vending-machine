@@ -24,11 +24,15 @@ public interface ITransactionService {
 
     }
 
-    static MachineResponseDto confirmPurchase(VendingMachine vendingMachine, Item item, Long balance){
+    static MachineResponseDto confirmPurchase(VendingMachine vendingMachine, Item item){
 
         item.setAmount(item.getAmount() - 1 );
 
+        Long balance = vendingMachine.getDepositedAmount();
+
         Long change = balance - item.getPrice();
+
+        vendingMachine.setDepositedAmount(null);
 
         releaseTransaction(vendingMachine);
 

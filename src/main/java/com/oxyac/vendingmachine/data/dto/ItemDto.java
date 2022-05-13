@@ -1,14 +1,18 @@
-package com.oxyac.vendingmachine.rest.repr;
+package com.oxyac.vendingmachine.data.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class ItemForm {
+public class ItemDto {
+
     @JsonProperty
     private String name;
+
     @JsonProperty
     private Integer amount;
+
     @JsonProperty
-    private Long price;
+    private String price;
+
 }

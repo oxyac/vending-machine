@@ -59,7 +59,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InventoryNullException.class)
-    protected ResponseEntity<Object> handleException(
+    protected ResponseEntity<Object> handleInventoryNull(
             InventoryNullException ex) {
         log.info("threw unknown Exception");
         VendingMachineError apiError = new VendingMachineError(METHOD_NOT_ALLOWED) {};

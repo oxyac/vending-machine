@@ -1,11 +1,14 @@
 package com.oxyac.vendingmachine.data.dto;
 
+import com.oxyac.vendingmachine.data.entity.Stock;
+
 import java.util.HashMap;
 
 public class WelcomeDto {
 
     private String welcomeMessage;
     private HashMap<String, String> availableRoutes;
+    private Stock stock;
 
 
     public HashMap<String, String> getAvailableRoutes() {
@@ -24,8 +27,9 @@ public class WelcomeDto {
         this.welcomeMessage = welcomeMessage;
     }
 
-    public WelcomeDto(HashMap<String, String> availableRoutes, String welcomeMessage) {
+    public WelcomeDto(String welcomeMessage, HashMap<String, String> availableRoutes, Stock stock) {
         this.welcomeMessage = welcomeMessage;
         this.availableRoutes = availableRoutes;
+        this.stock = stock;
     }
 }

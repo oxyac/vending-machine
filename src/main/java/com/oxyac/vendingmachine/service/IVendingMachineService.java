@@ -1,23 +1,23 @@
 package com.oxyac.vendingmachine.service;
 
 import com.oxyac.vendingmachine.data.dto.MachineResponseDto;
+import com.oxyac.vendingmachine.data.dto.StockDto;
 import com.oxyac.vendingmachine.data.entity.Item;
 import com.oxyac.vendingmachine.data.entity.VendingMachine;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
-import com.oxyac.vendingmachine.rest.repr.StockForm;
+import com.oxyac.vendingmachine.data.entity.Stock;
 
 public interface IVendingMachineService {
 
     VendingMachine getVendingMachine();
 
-    StockForm getStock() throws InventoryNullException;
+    Stock getStock() throws InventoryNullException;
 
-    void loadStock(StockForm stockForm);
-
-    Long returnChange();
+    Stock loadStock(StockDto stockDto);
 
     Item findByRowCol(String row, Integer col) throws Exception;
 
     Long depositCoin(Long deposited);
 
+    MachineResponseDto processTransaction(Item item) throws Exception;
 }
