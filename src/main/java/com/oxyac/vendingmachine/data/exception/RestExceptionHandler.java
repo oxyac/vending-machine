@@ -1,6 +1,7 @@
 package com.oxyac.vendingmachine.data.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +26,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error = "Malformed JSON request";
         return buildResponseEntity(new VendingMachineError(HttpStatus.BAD_REQUEST, error, ex));
+    }
+
+    public static Logger locally() {
+        return log;
     }
 
     private ResponseEntity<Object> buildResponseEntity(VendingMachineError apiError) {

@@ -4,9 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oxyac.vendingmachine.data.dto.ItemDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Generated;
 
-@Data
+import javax.persistence.*;
+
+@Entity
 public class Item {
+    @Id
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     @JsonProperty
     private String name;
@@ -18,10 +25,13 @@ public class Item {
     private Long price;
 
     @JsonProperty
+    @Column(name="rows")
     private String row;
 
     @JsonProperty
+    @Column(name="cols")
     private Integer col;
+
 
     public Item(String name, Integer amount, Long price) {
         this.name = name;
@@ -29,5 +39,47 @@ public class Item {
         this.price = price;
     }
 
+    public String getName() {
+        return name;
+    }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
+    }
+
+    public String getRow() {
+        return row;
+    }
+
+    public void setRow(String row) {
+        this.row = row;
+    }
+
+    public Integer getCol() {
+        return col;
+    }
+
+    public void setCol(Integer col) {
+        this.col = col;
+    }
+
+    public Item() {
+
+    }
 }

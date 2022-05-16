@@ -3,42 +3,70 @@ package com.oxyac.vendingmachine.service;
 import com.oxyac.vendingmachine.data.dto.ItemDto;
 import com.oxyac.vendingmachine.data.dto.MachineResponseDto;
 import com.oxyac.vendingmachine.data.dto.StockDto;
-import com.oxyac.vendingmachine.data.entity.Item;
-import com.oxyac.vendingmachine.data.entity.VendingMachine;
+import com.oxyac.vendingmachine.data.entity.*;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
-import com.oxyac.vendingmachine.data.entity.Stock;
 import com.oxyac.vendingmachine.data.exception.LowBalanceException;
 import com.oxyac.vendingmachine.data.exception.StockEmptyException;
+import com.oxyac.vendingmachine.data.repository.*;
 import com.oxyac.vendingmachine.util.LongToBigDecimalConverter;
 import com.oxyac.vendingmachine.util.StringToLongConverter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 @Slf4j
 @Service
-public class VendingMachineService implements IVendingMachineService, ITransactionService{
+public class VendingMachineService implements IVendingMachineService {
 
 
-    @Autowired
-    private VendingMachine vendingMachine;
+    private final VendingMachineRepository vendingMachineRepository;
 
-    @Autowired
-    private StringToLongConverter stringToLongConverter;
+    private final StringToLongConverter stringToLongConverter;
 
-    @Autowired
     public LongToBigDecimalConverter longToBigDecimalConverter;
+
+    private final ItemRepository itemRepository;
+
+    private final SessionRepository sessionRepository;
+
+    private final StockRepository stockRepository;
+
+    private StockConfigRepository stockConfigRepository;
+
+    private ITransactionService transactionService;
+
+    public VendingMachineService(VendingMachineRepository vendingMachineRepository,
+                                 StringToLongConverter stringToLongConverter,
+                                 LongToBigDecimalConverter longToBigDecimalConverter,
+                                 ItemRepository itemRepository,
+                                 SessionRepository sessionRepository,
+                                 StockRepository stockRepository,
+                                 StockConfigRepository stockConfigRepository,
+                                 ITransactionService transactionService) {
+
+        this.vendingMachineRepository = vendingMachineRepository;
+        this.stringToLongConverter = stringToLongConverter;
+        this.longToBigDecimalConverter = longToBigDecimalConverter;
+        this.itemRepository = itemRepository;
+        this.sessionRepository = sessionRepository;
+        this.stockRepository = stockRepository;
+        this.stockConfigRepository = stockConfigRepository;
+        this.transactionService = transactionService;
+
+    }
 
     @Override
     public Stock loadStock(StockDto stockDto) {
 
 
-        Stock stock = new Stock();
+        Stock stock = new Stock(stockDto.getConfig());
+
+        this.stockConfigRepository.save(stockDto.getConfig());
+        Session session =  this.sessionRepository.save(new Session());
+        VendingMachine vendingMachine = this.vendingMachineRepository.save(new VendingMachine());
+        stock.setVendingMachine(vendingMachine);
 
         stock.setConfig(stockDto.getConfig());
 
@@ -52,7 +80,7 @@ public class VendingMachineService implements IVendingMachineService, ITransacti
             char c = 'A';
             for (int j = 0; j < Integer.parseInt(stockDto.getConfig().getRows()); j++) {
 
-                if(iterator.hasNext()){
+                if (iterator.hasNext()) {
 
                     ItemDto tempItem = iterator.next();
 
@@ -66,26 +94,28 @@ public class VendingMachineService implements IVendingMachineService, ITransacti
                     item.setRow(String.valueOf(c));
 
                     items.add(item);
-
+                    log.info(item.toString());
                     c++;
-                }
-                else{
+                } else {
                     break outerLoop;
                 }
 
             }
         }
 
-        stock.setItems(items);
 
-        this.vendingMachine.setStock(stock);
+        this.itemRepository.saveAll(items);
+
+        stock.setItems(items);
+        stock = this.stockRepository.save(stock);
 
         return stock;
     }
 
     @Override
-    public Stock getStock() throws InventoryNullException {
-        Stock stock = this.vendingMachine.getStock();
+    public Optional<Stock> getStockById(UUID id) throws InventoryNullException {
+
+        Optional<Stock> stock = this.stockRepository.findByVendingMachineId(id);
 
         if (stock == null) {
             log.error("no stock");
@@ -97,17 +127,20 @@ public class VendingMachineService implements IVendingMachineService, ITransacti
     }
 
     @Override
-    public Item findByRowCol(String row, Integer col) throws Exception {
+    public Item findByRowCol(UUID id, String row, Integer col) throws Exception {
 
-        Stock stock = this.vendingMachine.getStock();
+
+        Optional<Stock> stock = this.stockRepository.findByVendingMachineId(id);
 
         log.info(stock.toString());
-        if (stock == null) {
+        if (stock.isEmpty()) {
             log.info("no stock");
             throw new InventoryNullException("-X POST /loadStock");
         }
 
-        for (Item stockItem : stock.getItems()) {
+        Stock foundStock = stock.get();
+
+        for (Item stockItem : foundStock.getItems()) {
             log.info(String.valueOf(stockItem.getRow().equals(row)));
             log.info(String.valueOf(stockItem.getCol().equals(col)));
             if (stockItem.getRow().equals(row) &&
@@ -123,53 +156,51 @@ public class VendingMachineService implements IVendingMachineService, ITransacti
     }
 
     @Override
-    public Long depositCoin(Long deposited) {
+    public Long depositCoin(UUID id, Long deposited) {
 
+        VendingMachine vendingMachine = this.vendingMachineRepository.getById(id);
 
-        if(vendingMachine.getDepositedAmount() == null){
+        Long balance = vendingMachine.getDepositedAmount();
 
-            ITransactionService.lockTransaction(this.vendingMachine);
+        if(balance == null){
+            this.transactionService.lockTransaction(vendingMachine);
 
-            vendingMachine.setDepositedAmount(deposited);
-
-        }
-        else{
+        } else {
 
             vendingMachine.setDepositedAmount(vendingMachine.getDepositedAmount() + deposited);
         }
 
-        return vendingMachine.getDepositedAmount();
+        VendingMachine vendingMachineEntity = vendingMachineRepository.save(vendingMachine);
+
+        return vendingMachineEntity.getDepositedAmount();
     }
 
     @Override
-    public MachineResponseDto processTransaction(Item item) throws Exception {
+    public MachineResponseDto processTransaction(UUID machine_id, String row, Integer col) throws Exception {
 
-        if(item == null){
-            log.info("not found");
+
+        VendingMachine vendingMachine = this.vendingMachineRepository.getById(machine_id);
+
+        Item desiredItem = this.findByRowCol(machine_id, row, col);
+
+        if (desiredItem == null) {
+            log.info("not found product ____ : " + row + ":" + col);
             throw new EntityNotFoundException("-X GET /getStock");
         }
 
-        if(item.getAmount() == 0){
+        if (desiredItem.getAmount() == 0) {
             throw new StockEmptyException("Rupture de stock.");
         }
 
-        if(this.vendingMachine.getDepositedAmount() < item.getPrice()) {
-            Long amountLeft = item.getPrice() - this.vendingMachine.getDepositedAmount();
+        if (vendingMachine.getDepositedAmount() < desiredItem.getPrice()) {
+            Long amountLeft = desiredItem.getPrice() - vendingMachine.getDepositedAmount();
             throw new LowBalanceException("Insufficient funds. Introduce " +
                     longToBigDecimalConverter.convert(amountLeft) + "$");
         }
 
-        return ITransactionService.confirmPurchase(this.vendingMachine, item);
+        return this.transactionService.confirmPurchase(vendingMachine, desiredItem);
 
     }
 
-
-    public VendingMachine getVendingMachine() {
-        return vendingMachine;
-    }
-
-    public void setVendingMachine(VendingMachine vendingMachine) {
-        this.vendingMachine = vendingMachine;
-    }
 
 }

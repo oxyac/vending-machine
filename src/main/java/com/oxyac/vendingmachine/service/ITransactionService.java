@@ -9,33 +9,9 @@ import java.util.Timer;
 
 public interface ITransactionService {
 
-    static void lockTransaction(VendingMachine vendingMachine) {
+    void lockTransaction(VendingMachine vendingMachine);
 
-        vendingMachine.setTransactionInProgress(true);
+    void releaseTransaction(VendingMachine vendingMachine);
 
-        //eat all user coins after 10 minutes
-        new Timer().schedule(new TransactionReleaseTask(), 0, 60000 * 10);
-
-    }
-
-    static void releaseTransaction(VendingMachine vendingMachine){
-
-        vendingMachine.setTransactionInProgress(false);
-
-    }
-
-    static MachineResponseDto confirmPurchase(VendingMachine vendingMachine, Item item){
-
-        item.setAmount(item.getAmount() - 1 );
-
-        Long balance = vendingMachine.getDepositedAmount();
-
-        Long change = balance - item.getPrice();
-
-        vendingMachine.setDepositedAmount(null);
-
-        releaseTransaction(vendingMachine);
-
-        return new MachineResponseDto(item, change);
-    }
+    MachineResponseDto confirmPurchase(VendingMachine vendingMachine, Item item);
 }

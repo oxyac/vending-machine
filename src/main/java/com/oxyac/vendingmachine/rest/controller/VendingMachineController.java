@@ -48,25 +48,36 @@ public class VendingMachineController {
         routes.put("/purchase&row={B}&col={2}", "Make a purchase with deposited money");
 
 
-        WelcomeDto welcome = new WelcomeDto("Here is a description of all available routes", routes, stock);
+        WelcomeDto welcome = new WelcomeDto("Here is a description of all available routes",
+                routes, stock, stock.getVendingMachine().getId());
 
         return ResponseEntity.ok(welcome);
     }
 
     @RequestMapping("/getStock")
-    public ResponseEntity<Stock> getStock() throws InventoryNullException {
+    public ResponseEntity<Optional<Stock>> getStockById(@RequestParam UUID machine_id) throws Exception {
 
-        return ResponseEntity.ok(vendingMachineService.getStock());
+
+        Optional<Stock> stock =  vendingMachineService.getStockById(machine_id);
+
+        if(stock.isEmpty()){
+            log.info("not found");
+            throw new EntityNotFoundException("-X POST /loadStock");
+        }
+
+        return ResponseEntity.ok(stock);
 
     }
 
     @RequestMapping(value = "/selection", method = RequestMethod.GET)
-    public ResponseEntity<Item> selectProduct(@RequestParam String row, @RequestParam Integer col) throws Exception {
+    public ResponseEntity<Item> selectProduct(@RequestParam String row,
+                                              @RequestParam Integer col,
+                                              @RequestParam UUID machine_id) throws Exception {
 
         log.info(row);
         log.info(String.valueOf(col));
 
-        Item item = vendingMachineService.findByRowCol(row, col);
+        Item item = vendingMachineService.findByRowCol(machine_id, row, col);
 
         if(item == null){
             log.info("not found");
@@ -81,15 +92,15 @@ public class VendingMachineController {
 
     @RequestMapping(value = "/purchase", method = RequestMethod.GET)
     public ResponseEntity<MachineResponseDto> purchaseProduct(@RequestParam String row,
-                                                              @RequestParam Integer col) throws Exception {
+                                                              @RequestParam Integer col,
+                                                              @RequestParam UUID machine_id) throws Exception {
 
         log.info("ROW:__"+row+"COL:__"+ col);
 
-        Item desiredItem = vendingMachineService.findByRowCol(row, col);
 
-        MachineResponseDto responseDto = vendingMachineService.processTransaction(desiredItem);
+        MachineResponseDto responseDto = vendingMachineService.processTransaction(machine_id, row, col);
 
-        log.info("TRANSACTION_SUCCESS_FOR_ITEM:___" + desiredItem.toString());
+        log.info("TRANSACTION_SUCCESS_FOR_ITEM:___" + responseDto.toString());
 
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -98,11 +109,11 @@ public class VendingMachineController {
     }
 
     @RequestMapping(value = "/deposit", method = RequestMethod.GET)
-    public ResponseEntity<Long> depositCoin(@RequestParam Long amount) throws Exception {
+    public ResponseEntity<Long> depositCoin(@RequestParam Long amount, @RequestParam UUID machine_id) throws Exception {
 
         log.info(String.valueOf(amount));
 
-        Long moneyDeposited = vendingMachineService.depositCoin(amount);
+        Long moneyDeposited = vendingMachineService.depositCoin(machine_id, amount);
 
         return new ResponseEntity<>(moneyDeposited, HttpStatus.OK);
 

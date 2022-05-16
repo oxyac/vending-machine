@@ -7,17 +7,18 @@ import com.oxyac.vendingmachine.data.entity.VendingMachine;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
 import com.oxyac.vendingmachine.data.entity.Stock;
 
+import java.util.Optional;
+import java.util.UUID;
+
 public interface IVendingMachineService {
-
-    VendingMachine getVendingMachine();
-
-    Stock getStock() throws InventoryNullException;
 
     Stock loadStock(StockDto stockDto);
 
-    Item findByRowCol(String row, Integer col) throws Exception;
+    Optional<Stock> getStockById(UUID id) throws InventoryNullException;
 
-    Long depositCoin(Long deposited);
+    Item findByRowCol(UUID id, String row, Integer col) throws Exception;
 
-    MachineResponseDto processTransaction(Item item) throws Exception;
+    Long depositCoin(UUID id, Long deposited);
+
+    MachineResponseDto processTransaction(UUID id, String row, Integer col) throws Exception;
 }
