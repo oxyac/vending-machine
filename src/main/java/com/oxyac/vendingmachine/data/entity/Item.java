@@ -1,12 +1,15 @@
 package com.oxyac.vendingmachine.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oxyac.vendingmachine.data.dto.ItemDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.ManyToAny;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Item {
@@ -32,6 +35,10 @@ public class Item {
     @Column(name="cols")
     private Integer col;
 
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "stock_id")
+    private Stock stock;
 
     public Item(String name, Integer amount, Long price) {
         this.name = name;
@@ -81,5 +88,13 @@ public class Item {
 
     public Item() {
 
+    }
+
+    public Stock getStock() {
+        return stock;
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 }

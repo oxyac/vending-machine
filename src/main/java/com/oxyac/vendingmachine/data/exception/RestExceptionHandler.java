@@ -41,6 +41,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             LowBalanceException ex) {
         log.info("threw LowBalanceException");
         VendingMachineError apiError = new VendingMachineError(NOT_ACCEPTABLE) {};
+        apiError.setErrorCode(-1);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
     }
@@ -50,6 +51,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             StockEmptyException ex) {
         log.info("threw StockEmptyException");
         VendingMachineError apiError = new VendingMachineError(CONFLICT) {};
+        apiError.setErrorCode(-2);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
     }
@@ -59,6 +61,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             EntityNotFoundException ex) {
         log.info("threw EntityNotFoundException");
         VendingMachineError apiError = new VendingMachineError(NOT_FOUND) {};
+        apiError.setErrorCode(-8);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
     }
@@ -68,6 +71,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             InventoryNullException ex) {
         log.info("threw unknown Exception");
         VendingMachineError apiError = new VendingMachineError(METHOD_NOT_ALLOWED) {};
+        apiError.setErrorCode(-10);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(WrongMachineException.class)
+    protected ResponseEntity<Object> handleWrongMachine(
+            WrongMachineException ex) {
+        log.info("threw StockEmptyException");
+        VendingMachineError apiError = new VendingMachineError(NOT_FOUND) {};
+        apiError.setErrorCode(-100);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
     }

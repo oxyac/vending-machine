@@ -3,17 +3,23 @@ package com.oxyac.vendingmachine.service;
 import com.oxyac.vendingmachine.data.dto.ItemDto;
 import com.oxyac.vendingmachine.data.dto.MachineResponseDto;
 import com.oxyac.vendingmachine.data.dto.StockDto;
+import com.oxyac.vendingmachine.data.dto.StockResponseDto;
 import com.oxyac.vendingmachine.data.entity.*;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
 import com.oxyac.vendingmachine.data.exception.LowBalanceException;
 import com.oxyac.vendingmachine.data.exception.StockEmptyException;
+import com.oxyac.vendingmachine.data.exception.WrongMachineException;
 import com.oxyac.vendingmachine.data.repository.*;
+import com.oxyac.vendingmachine.rest.repr.StockMapper;
 import com.oxyac.vendingmachine.util.LongToBigDecimalConverter;
 import com.oxyac.vendingmachine.util.StringToLongConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.mapper.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import javax.swing.text.html.Option;
 import java.util.*;
 
 @Slf4j
@@ -37,6 +43,8 @@ public class VendingMachineService implements IVendingMachineService {
 
     private ITransactionService transactionService;
 
+    private StockMapper stockMapper;
+
     public VendingMachineService(VendingMachineRepository vendingMachineRepository,
                                  StringToLongConverter stringToLongConverter,
                                  LongToBigDecimalConverter longToBigDecimalConverter,
@@ -44,7 +52,8 @@ public class VendingMachineService implements IVendingMachineService {
                                  SessionRepository sessionRepository,
                                  StockRepository stockRepository,
                                  StockConfigRepository stockConfigRepository,
-                                 ITransactionService transactionService) {
+                                 ITransactionService transactionService,
+                                 StockMapper stockMapper) {
 
         this.vendingMachineRepository = vendingMachineRepository;
         this.stringToLongConverter = stringToLongConverter;
@@ -54,6 +63,7 @@ public class VendingMachineService implements IVendingMachineService {
         this.stockRepository = stockRepository;
         this.stockConfigRepository = stockConfigRepository;
         this.transactionService = transactionService;
+        this.stockMapper = stockMapper;
 
     }
 
@@ -64,11 +74,9 @@ public class VendingMachineService implements IVendingMachineService {
         Stock stock = new Stock(stockDto.getConfig());
 
         this.stockConfigRepository.save(stockDto.getConfig());
-        Session session =  this.sessionRepository.save(new Session());
+        this.sessionRepository.save(new Session());
         VendingMachine vendingMachine = this.vendingMachineRepository.save(new VendingMachine());
-        stock.setVendingMachine(vendingMachine);
 
-        stock.setConfig(stockDto.getConfig());
 
         ListIterator<ItemDto> iterator = stockDto.getItems().listIterator();
 
@@ -103,26 +111,40 @@ public class VendingMachineService implements IVendingMachineService {
             }
         }
 
-
         this.itemRepository.saveAll(items);
+        log.info("SAVED ITEMS");
 
+        vendingMachine.setStock(stock);
+        this.vendingMachineRepository.save(vendingMachine);
+        log.info("SAVED VM");
+        stock.setVendingMachine(vendingMachine);
+        stock.setConfig(stockDto.getConfig());
         stock.setItems(items);
+
         stock = this.stockRepository.save(stock);
+        log.info("SAVED STOCK");
 
         return stock;
     }
 
     @Override
-    public Optional<Stock> getStockById(UUID id) throws InventoryNullException {
+    public StockResponseDto getStockById(UUID id) throws InventoryNullException, WrongMachineException {
 
-        Optional<Stock> stock = this.stockRepository.findByVendingMachineId(id);
+        Optional<VendingMachine> vendingMachine = this.vendingMachineRepository.findById(id);
 
-        if (stock == null) {
+        if(vendingMachine.isEmpty()){
+            log.error("wrong machine id");
+            throw new WrongMachineException("-X POST /loadStock");
+        }
+
+        Optional<Stock> stock = this.stockRepository.findByVendingMachine(vendingMachine.get());
+        log.info(stock.toString());
+        if (stock.isEmpty()) {
             log.error("no stock");
             throw new InventoryNullException("-X POST /loadStock");
         }
 
-        return stock;
+        return stockMapper.toDto(stock.get());
 
     }
 
@@ -132,26 +154,25 @@ public class VendingMachineService implements IVendingMachineService {
 
         Optional<Stock> stock = this.stockRepository.findByVendingMachineId(id);
 
+
         log.info(stock.toString());
         if (stock.isEmpty()) {
             log.info("no stock");
             throw new InventoryNullException("-X POST /loadStock");
         }
 
-        Stock foundStock = stock.get();
+        Optional<Item> item = this.itemRepository.findByColAndRow(col, row);
 
-        for (Item stockItem : foundStock.getItems()) {
-            log.info(String.valueOf(stockItem.getRow().equals(row)));
-            log.info(String.valueOf(stockItem.getCol().equals(col)));
-            if (stockItem.getRow().equals(row) &&
-                    stockItem.getCol().equals(col)) {
 
-                log.info("item:" + stockItem.toString());
-                return stockItem;
-            }
+        log.info(stock.toString());
+        if (item.isEmpty()) {
+            log.info("not found item");
+            throw new EntityNotFoundException("-X GET /getStock?machine_id=" + id);
         }
 
-        return null;
+        log.info("item:" + item.toString());
+
+        return item.get();
 
     }
 

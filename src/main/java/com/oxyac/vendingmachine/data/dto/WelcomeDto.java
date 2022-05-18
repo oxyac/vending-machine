@@ -1,9 +1,11 @@
 package com.oxyac.vendingmachine.data.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oxyac.vendingmachine.data.entity.Item;
 import com.oxyac.vendingmachine.data.entity.Stock;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class WelcomeDto {
@@ -15,16 +17,18 @@ public class WelcomeDto {
     private HashMap<String, String> availableRoutes;
 
     @JsonProperty
-    private Stock stock;
-
-    @JsonProperty
     private UUID serialNumber;
 
+    @JsonProperty
+    private List<Item> items;
 
-    public WelcomeDto(String welcomeMessage, HashMap<String, String> availableRoutes, Stock stock, UUID serialNumber) {
+
+
+
+    public WelcomeDto(String welcomeMessage, HashMap<String, String> availableRoutes, List<Item> stock, UUID serialNumber) {
         this.welcomeMessage = welcomeMessage;
         this.availableRoutes = availableRoutes;
-        this.stock = stock;
+        this.items = stock;
         this.serialNumber = serialNumber;
     }
 }

@@ -18,6 +18,8 @@ public class VendingMachineError {
     private String debugMessage;
     private List<SubError> subErrors;
 
+    private Integer errorCode;
+
     private VendingMachineError() {
         timestamp = LocalDateTime.now();
     }

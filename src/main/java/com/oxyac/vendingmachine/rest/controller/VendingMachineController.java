@@ -1,6 +1,7 @@
 package com.oxyac.vendingmachine.rest.controller;
 
 
+import com.oxyac.vendingmachine.data.dto.StockResponseDto;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
 import com.oxyac.vendingmachine.data.exception.LowBalanceException;
 import com.oxyac.vendingmachine.data.exception.StockEmptyException;
@@ -41,29 +42,23 @@ public class VendingMachineController {
 
         HashMap<String, String> routes = new HashMap<>();
 
-        routes.put("/getStock", "Return all item info");
+        routes.put("/getStock?machine_id={uuid}", "Return all item info");
         routes.put("/loadStock", "Load and parse JSON containing new products");
-        routes.put("/selection&row={B}&col={2}", "Returns item info");
-        routes.put("/deposit&amount={225}", "Deposit coins into machine");
-        routes.put("/purchase&row={B}&col={2}", "Make a purchase with deposited money");
+        routes.put("/selection&row={B}&col={2}&machine_id={uuid}", "Returns item info");
+        routes.put("/deposit&amount={225}&machine_id={uuid}", "Deposit coins into machine");
+        routes.put("/purchase&row={B}&col={2}&machine_id={uuid}", "Make a purchase with deposited money");
 
 
-        WelcomeDto welcome = new WelcomeDto("Here is a description of all available routes",
-                routes, stock, stock.getVendingMachine().getId());
+        WelcomeDto welcome = new WelcomeDto("Please provide the serial number in all future requests",
+                routes, stock.getItems(), stock.getVendingMachine().getId());
 
         return ResponseEntity.ok(welcome);
     }
 
     @RequestMapping("/getStock")
-    public ResponseEntity<Optional<Stock>> getStockById(@RequestParam UUID machine_id) throws Exception {
+    public ResponseEntity<StockResponseDto> getStockById(@RequestParam UUID machine_id) throws Exception {
 
-
-        Optional<Stock> stock =  vendingMachineService.getStockById(machine_id);
-
-        if(stock.isEmpty()){
-            log.info("not found");
-            throw new EntityNotFoundException("-X POST /loadStock");
-        }
+        StockResponseDto stock =  vendingMachineService.getStockById(machine_id);
 
         return ResponseEntity.ok(stock);
 
