@@ -8,10 +8,11 @@ import { ProductShellComponent } from './components/product-shell/product-shell.
 import { ProductComponent } from './components/product/product.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
-import { FormsModule } from '@angular/forms';
-import { HeaderComponent } from './componenets/header/header.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import { HeaderComponent } from './components/header/header.component';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -21,13 +22,17 @@ import { HeaderComponent } from './components/header/header.component';
     ProductComponent,
     DashboardComponent,
     FileUploadComponent,
-    HeaderComponent,
-    NgbModule
+    HeaderComponent
+
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    RouterModule
+    RouterModule,
+    HttpClientModule,
+    NgbModule,
+    ReactiveFormsModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

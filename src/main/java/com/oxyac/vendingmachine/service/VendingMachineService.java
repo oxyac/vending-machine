@@ -213,7 +213,7 @@ public class VendingMachineService implements IVendingMachineService {
             throw new StockEmptyException("Rupture de stock.");
         }
 
-        if (vendingMachine.getDepositedAmount() < desiredItem.getPrice()) {
+        if (vendingMachine.getDepositedAmount() != null && vendingMachine.getDepositedAmount() < desiredItem.getPrice()) {
             Long amountLeft = desiredItem.getPrice() - vendingMachine.getDepositedAmount();
             throw new LowBalanceException("Insufficient funds. Introduce " +
                     longToBigDecimalConverter.convert(amountLeft) + "$");

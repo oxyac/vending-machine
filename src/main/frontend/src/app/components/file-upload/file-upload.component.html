@@ -1,1 +1,57 @@
-<p>file-upload works!</p>
+<div>
+  <form [formGroup]="apiRequest" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <div formGroupName="config" class="col-sm-4">
+
+        <div>
+          <label for="rows" class="col-sm-1">Rows</label>
+          <input id="rows" type="text" formControlName="rows" class="col-sm-1">
+        </div>
+        <div>
+          <label for="columns" class="col-sm-1">Columns</label>
+          <input id="columns" type="text" formControlName="columns" class="col-sm-1">
+        </div>
+
+      </div>
+      <div class="col-sm-6">
+        <div class="row">
+          <div class="col-md-3">
+            <button class="btn btn-danger" (click)='addItem()'>Add Ticket</button>
+          </div>
+        </div>
+
+        <div formArrayName="items" *ngFor="let t of items.controls; let i = index">
+          <div class="row" [formGroupName]="i">
+            <div class="col-md-2">
+              <p class="lead">Snack {{i + 1}}</p>
+            </div>
+            <div class="col-md-4">
+              <input formControlName='name' id="{{'name'+i}}" type="text" class="form-control mb-4"
+                     placeholder="Enter Name"/>
+
+            </div>
+            <div class="col-md-3">
+              <input formControlName='amount' id="{{'amount' + i}}" type="number" class="form-control mb-4"
+                     placeholder="Enter Amount "/>
+            </div>
+            <div class="col-md-3">
+              <input formControlName='price' id="{{'price' + i}}" type="text" class="form-control mb-4"
+                     placeholder="Enter Price "/>
+            </div>
+
+          </div>
+
+
+        </div>
+      </div>
+
+    </div>
+
+  </form>
+</div>
+<div>
+
+  <button type="submit" [disabled]="!apiRequest.valid">Submit</button>
+</div>
+
+<p>{{ apiRequest.value | json}}</p>
