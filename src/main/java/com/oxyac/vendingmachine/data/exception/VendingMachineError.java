@@ -16,7 +16,7 @@ public class VendingMachineError {
     private LocalDateTime timestamp;
     private String message;
     private String debugMessage;
-    private List<SubError> subErrors;
+//    private List<SubError> subErrors;
 
     private Integer errorCode;
 
