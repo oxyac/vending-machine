@@ -1,3 +1,6 @@
+docker/docker-compose.override.yml
+postgres-datadir
+
 HELP.md
 .gradle
 build/
