@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  vm_app_database:
+    volumes:
+      - /home/og/Projects/java/vending-machine/postgres-datadir:/var/lib/postgresql/data/pgdata
+    ports:
+      - "54320:5432"
+
+  vm_app:
+    ports:
+      - "8083:8082"

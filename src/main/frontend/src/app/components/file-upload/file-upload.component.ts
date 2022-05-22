@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { VendingMachineService } from '../../services/vending-machine.service';
+import { ApiRequest } from '../../models/api-request.model';
 
 @Component({
   selector: 'app-file-upload',
@@ -8,22 +10,36 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 })
 export class FileUploadComponent{
 
+  numberRegEx = /\-?\d*\.?\d{1,2}/;
+
   apiRequest = this.fb.group({
     config: this.fb.group({
-      rows: ['', Validators.required],
-      columns: ['', Validators.required],
+      rows: ['', [Validators.required, Validators.pattern(this.numberRegEx), Validators.max(20), Validators.min(1)]],
+      columns: ['', [Validators.required, Validators.pattern(this.numberRegEx), Validators.max(20), Validators.min(1)]],
     }),
     items: this.fb.array([
       this.fb.group({
-        name: ['', Validators.required],
-        amount: ['', Validators.required],
-        price: ['', Validators.required]
+        name: ['Snickers', Validators.required],
+        amount: [0, Validators.required],
+        price: [0.11, [Validators.required,  Validators.max(1000), Validators.min(0.10)]]
       })
     ], Validators.required)
   });
 
+  get rows() {
+    return this.apiRequest.get('config.rows');
+  }
+
+  get columns() {
+    return this.apiRequest.get('config.columns');
+  }
+
   get items() {
     return this.apiRequest.get('items') as FormArray;
+  }
+
+  get name(){
+    return this.apiRequest.get('items')?.get('name') as FormControl;
   }
 
   addItem() {
@@ -34,13 +50,15 @@ export class FileUploadComponent{
     }));
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+              private vmService : VendingMachineService) {
     this.updateConfig();
+
   }
 
 
   onSubmit() {
-    // TODO
+    this.vmService.loadStock(<ApiRequest>this.apiRequest.value);
   }
 
   updateConfig() {
@@ -51,5 +69,9 @@ export class FileUploadComponent{
         }
       }
     );
+  }
+
+  removeItem(pos : number) {
+    this.items.removeAt(pos);
   }
 }
