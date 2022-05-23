@@ -5,10 +5,10 @@ import com.oxyac.vendingmachine.data.dto.StockResponseDto;
 import com.oxyac.vendingmachine.data.exception.InventoryNullException;
 import com.oxyac.vendingmachine.data.exception.LowBalanceException;
 import com.oxyac.vendingmachine.data.exception.StockEmptyException;
-import com.oxyac.vendingmachine.service.IVendingMachineService;
+import com.oxyac.vendingmachine.service.VendingMachineService;
 import com.oxyac.vendingmachine.util.LongToBigDecimalConverter;
 import com.oxyac.vendingmachine.data.dto.MachineResponseDto;
-import com.oxyac.vendingmachine.service.ITransactionService;
+import com.oxyac.vendingmachine.service.TransactionService;
 import com.oxyac.vendingmachine.data.entity.VendingMachine;
 import com.oxyac.vendingmachine.data.dto.WelcomeDto;
 import com.oxyac.vendingmachine.data.entity.Stock;
@@ -26,20 +26,18 @@ import java.util.*;
 @Slf4j
 public class VendingMachineController {
 
-    private final IVendingMachineService vendingMachineService;
+    private final VendingMachineService vendingMachineService;
     public final LongToBigDecimalConverter longToBigDecimalConverter;
 
-    public VendingMachineController(IVendingMachineService vendingMachineService, LongToBigDecimalConverter longToBigDecimalConverter) {
+    public VendingMachineController(VendingMachineService vendingMachineService, LongToBigDecimalConverter longToBigDecimalConverter) {
         this.vendingMachineService = vendingMachineService;
         this.longToBigDecimalConverter = longToBigDecimalConverter;
     }
 
 
     @RequestMapping("/loadStock")
-    public ResponseEntity<WelcomeDto> reStock(@RequestBody StockDto stockDto) {
-
+    public ResponseEntity<WelcomeDto> loadStock(@RequestBody StockDto stockDto) {
         Stock stock = vendingMachineService.loadStock(stockDto);
-
         HashMap<String, String> routes = new HashMap<>();
 
         routes.put("/getStock?machine_id={uuid}", "Return all item info");
@@ -47,7 +45,6 @@ public class VendingMachineController {
         routes.put("/selection&row={B}&col={2}&machine_id={uuid}", "Returns item info");
         routes.put("/deposit&amount={225}&machine_id={uuid}", "Deposit coins into machine");
         routes.put("/purchase&row={B}&col={2}&machine_id={uuid}", "Make a purchase with deposited money");
-
 
         WelcomeDto welcome = new WelcomeDto("Please provide the serial number in all future requests",
                 routes, stock.getItems(), stock.getVendingMachine().getId());
@@ -89,28 +86,18 @@ public class VendingMachineController {
     public ResponseEntity<MachineResponseDto> purchaseProduct(@RequestParam String row,
                                                               @RequestParam Integer col,
                                                               @RequestParam UUID machine_id) throws Exception {
-
         log.info("ROW:__"+row+"COL:__"+ col);
-
-
         MachineResponseDto responseDto = vendingMachineService.processTransaction(machine_id, row, col);
-
         log.info("TRANSACTION_SUCCESS_FOR_ITEM:___" + responseDto.toString());
 
-
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
-
-
     }
 
     @RequestMapping(value = "/deposit", method = RequestMethod.GET)
     public ResponseEntity<Long> depositCoin(@RequestParam Long amount, @RequestParam UUID machine_id) throws Exception {
-
         log.info(String.valueOf(amount));
-
         Long moneyDeposited = vendingMachineService.depositCoin(machine_id, amount);
 
         return new ResponseEntity<>(moneyDeposited, HttpStatus.OK);
-
     }
 }

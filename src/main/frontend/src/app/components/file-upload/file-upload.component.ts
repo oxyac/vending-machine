@@ -8,7 +8,7 @@ import { ApiRequest } from '../../models/api-request.model';
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
-export class FileUploadComponent{
+export class FileUploadComponent {
 
   numberRegEx = /\-?\d*\.?\d{1,2}/;
 
@@ -20,11 +20,17 @@ export class FileUploadComponent{
     items: this.fb.array([
       this.fb.group({
         name: ['Snickers', Validators.required],
-        amount: [0, Validators.required],
-        price: [0.11, [Validators.required,  Validators.max(1000), Validators.min(0.10)]]
+        amount: [10, Validators.required],
+        price: [1.60, [Validators.required, Validators.max(1000), Validators.min(0.10)]]
       })
     ], Validators.required)
   });
+
+  constructor(private fb: FormBuilder,
+              private vmService: VendingMachineService) {
+    this.updateConfig();
+
+  }
 
   get rows() {
     return this.apiRequest.get('config.rows');
@@ -38,7 +44,7 @@ export class FileUploadComponent{
     return this.apiRequest.get('items') as FormArray;
   }
 
-  get name(){
+  get name() {
     return this.apiRequest.get('items')?.get('name') as FormControl;
   }
 
@@ -50,15 +56,11 @@ export class FileUploadComponent{
     }));
   }
 
-  constructor(private fb: FormBuilder,
-              private vmService : VendingMachineService) {
-    this.updateConfig();
-
-  }
-
 
   onSubmit() {
-    this.vmService.loadStock(<ApiRequest>this.apiRequest.value);
+    this.vmService.loadStock(<ApiRequest>this.apiRequest.value).subscribe((r) => {
+      console.log(r);
+    });
   }
 
   updateConfig() {
@@ -71,7 +73,7 @@ export class FileUploadComponent{
     );
   }
 
-  removeItem(pos : number) {
+  removeItem(pos: number) {
     this.items.removeAt(pos);
   }
 }

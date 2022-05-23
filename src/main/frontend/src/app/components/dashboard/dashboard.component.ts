@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { VendingMachineService } from '../../services/vending-machine.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -7,13 +8,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DashboardComponent implements OnInit {
 
-  constructor() { }
-
-  ngOnInit(): void {
-
+  constructor(public vmService: VendingMachineService) {
   }
 
+  ngOnInit(): void {
+    this.vmService.refreshState();
+  }
 
-
-
+  deposit(amount: number) {
+    this.vmService.deposit(amount).subscribe((r) => {
+      this.vmService.refreshState();
+    });
+  }
 }

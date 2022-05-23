@@ -4,14 +4,14 @@ export class VendingMachine{
 
   private _machine_id: string;
 
-  private _stock: Snack[];
+  private _items: Snack[];
 
   private _deposited?: number;
 
 
   constructor(machine_id: string, stock: Snack[]) {
     this._machine_id = machine_id;
-    this._stock = stock;
+    this._items = stock;
   }
 
 
@@ -23,12 +23,12 @@ export class VendingMachine{
     this._machine_id = value;
   }
 
-  get stock(): Snack[] {
-    return this._stock;
+  get items(): Snack[] {
+    return this._items;
   }
 
-  set stock(value: Snack[]) {
-    this._stock = value;
+  set items(value: Snack[]) {
+    this._items = value;
   }
 
   get deposited(): number {

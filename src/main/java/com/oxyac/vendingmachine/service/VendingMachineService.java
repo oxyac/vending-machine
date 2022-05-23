@@ -20,31 +20,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import javax.swing.text.html.Option;
 import java.util.*;
 
 @Slf4j
 @Service
-public class VendingMachineService implements IVendingMachineService {
-
-
+public class VendingMachineService {
     private final VendingMachineRepository vendingMachineRepository;
-
     private final StringToLongConverter stringToLongConverter;
-
-    public LongToBigDecimalConverter longToBigDecimalConverter;
-
     private final ItemRepository itemRepository;
-
     private final SessionRepository sessionRepository;
-
     private final StockRepository stockRepository;
-
-    private StockConfigRepository stockConfigRepository;
-
-    private ITransactionService transactionService;
-
-    private StockMapper stockMapper;
+    private final StockConfigRepository stockConfigRepository;
+    private final TransactionService transactionService;
+    private final StockMapper stockMapper;
+    public LongToBigDecimalConverter longToBigDecimalConverter;
 
     public VendingMachineService(VendingMachineRepository vendingMachineRepository,
                                  StringToLongConverter stringToLongConverter,
@@ -53,7 +42,7 @@ public class VendingMachineService implements IVendingMachineService {
                                  SessionRepository sessionRepository,
                                  StockRepository stockRepository,
                                  StockConfigRepository stockConfigRepository,
-                                 ITransactionService transactionService,
+                                 TransactionService transactionService,
                                  StockMapper stockMapper) {
 
         this.vendingMachineRepository = vendingMachineRepository;
@@ -68,32 +57,22 @@ public class VendingMachineService implements IVendingMachineService {
 
     }
 
-    @Override
     public Stock loadStock(StockDto stockDto) {
-
-
         Stock stock = new Stock(stockDto.getConfig());
 
         this.stockConfigRepository.save(stockDto.getConfig());
         this.sessionRepository.save(new Session());
         VendingMachine vendingMachine = this.vendingMachineRepository.save(new VendingMachine());
-
-
         ListIterator<ItemDto> iterator = stockDto.getItems().listIterator();
 
         List<Item> items = new ArrayList<>();
 
         outerLoop:
         for (int i = 1; i <= stockDto.getConfig().getColumns(); i++) {
-
             char c = 'A';
             for (int j = 0; j < Integer.parseInt(stockDto.getConfig().getRows()); j++) {
-
                 if (iterator.hasNext()) {
-
                     ItemDto tempItem = iterator.next();
-
-
                     Item item = new Item(
                             tempItem.getName(),
                             tempItem.getAmount(),
@@ -108,7 +87,6 @@ public class VendingMachineService implements IVendingMachineService {
                 } else {
                     break outerLoop;
                 }
-
             }
         }
 
@@ -128,12 +106,10 @@ public class VendingMachineService implements IVendingMachineService {
         return stock;
     }
 
-    @Override
     public StockResponseDto getStockById(UUID id) throws InventoryNullException, WrongMachineException {
-
         Optional<VendingMachine> vendingMachine = this.vendingMachineRepository.findById(id);
 
-        if(vendingMachine.isEmpty()){
+        if (vendingMachine.isEmpty()) {
             log.error("wrong machine id");
             throw new WrongMachineException("-X POST /loadStock");
         }
@@ -146,61 +122,20 @@ public class VendingMachineService implements IVendingMachineService {
         }
 
         return stockMapper.toDto(stock.get());
-
     }
 
-    @Override
-    public Item findByRowCol(UUID id, String row, Integer col) throws Exception {
-
-
-        Optional<Stock> stock = this.stockRepository.findByVendingMachineId(id);
-
-
-        log.info(stock.toString());
-        if (stock.isEmpty()) {
-            log.info("no stock");
-            throw new InventoryNullException("-X POST /loadStock");
-        }
-
-        Optional<Item> item = this.itemRepository.findByColAndRow(col, row);
-
-
-        log.info(stock.toString());
-        if (item.isEmpty()) {
-            log.info("not found item");
-            throw new EntityNotFoundException("-X GET /getStock?machine_id=" + id);
-        }
-
-        log.info("item:" + item.toString());
-
-        return item.get();
-
-    }
-
-    @Override
     public Long depositCoin(UUID id, Long deposited) {
-
         VendingMachine vendingMachine = this.vendingMachineRepository.getById(id);
-
         Long balance = vendingMachine.getDepositedAmount();
-
-        if(balance == null){
-            this.transactionService.lockTransaction(vendingMachine);
-
-        } else {
-
-            vendingMachine.setDepositedAmount(vendingMachine.getDepositedAmount() + deposited);
+        if (balance == null) {
+            balance = 0L;
         }
-
+        vendingMachine.setDepositedAmount(balance + deposited);
         VendingMachine vendingMachineEntity = vendingMachineRepository.save(vendingMachine);
-
         return vendingMachineEntity.getDepositedAmount();
     }
 
-    @Override
     public MachineResponseDto processTransaction(UUID machine_id, String row, Integer col) throws Exception {
-
-
         VendingMachine vendingMachine = this.vendingMachineRepository.getById(machine_id);
 
         Item desiredItem = this.findByRowCol(machine_id, row, col);
@@ -221,7 +156,26 @@ public class VendingMachineService implements IVendingMachineService {
         }
 
         return this.transactionService.confirmPurchase(vendingMachine, desiredItem);
+    }
 
+    public Item findByRowCol(UUID id, String row, Integer col) throws Exception {
+        Optional<Stock> stock = this.stockRepository.findByVendingMachineId(id);
+
+        if (stock.isEmpty()) {
+            log.info("no stock");
+            throw new InventoryNullException("-X POST /loadStock");
+        }
+        System.out.println(stock);
+        Optional<Item> item = this.itemRepository.findByColAndRowAndStockId(col, row, stock.get().getId());
+
+        if (item.isEmpty()) {
+            log.info("not found item");
+            throw new EntityNotFoundException("-X GET /getStock?machine_id=" + id);
+        }
+        System.out.println(item);
+        log.info("item:" + item.toString());
+
+        return item.get();
     }
 
 

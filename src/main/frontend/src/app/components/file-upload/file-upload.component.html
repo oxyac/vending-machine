@@ -1,5 +1,5 @@
 <div>
-  <form [formGroup]="apiRequest" (ngSubmit)="onSubmit()">
+  <form [formGroup]="apiRequest">
     <div class="row">
       <div formGroupName="config" class="col-sm-3">
 
@@ -43,32 +43,32 @@
             <div class="col-md-2">
               <input formControlName='name' id="{{'name'+i}}" type="text" class="form-control mb-4"
                      placeholder="Enter Name"/>
-<!--              <div *ngIf="name.invalid && (name.dirty || name.touched)"-->
-<!--                   class="alert alert-danger">-->
+              <!--              <div *ngIf="name.invalid && (name.dirty || name.touched)"-->
+              <!--                   class="alert alert-danger">-->
 
-<!--                <div *ngIf="name.errors?.['required']">-->
-<!--                  Name is required.-->
-<!--                </div>-->
-<!--              </div>-->
+              <!--                <div *ngIf="name.errors?.['required']">-->
+              <!--                  Name is required.-->
+              <!--                </div>-->
+              <!--              </div>-->
 
             </div>
             <div class="col-md-2">
               <input formControlName='amount' id="{{'amount' + i}}" type="number" class="form-control mb-4"
-                     placeholder="Enter Amount " />
+                     placeholder="Enter Amount "/>
             </div>
             <div class="col-md-2">
-              <input formControlName='price' id="{{'price' + i}}" type="text" class="form-control mb-4"
-                     placeholder="Enter Price " [value]="items.value[i].total | currency" />
+              <input currencyMask formControlName='price' id="{{'price' + i}}" type="text" class="form-control mb-4"
+                     placeholder="Enter Price " [value]="items.value[i].total | currency"/>
             </div>
 
             <div class="col-md-2">
-                <button class="btn btn-danger" (click)='removeItem(i)'>Remove</button>
+              <button class="btn btn-danger" (click)='removeItem(i)'>Remove</button>
             </div>
 
-<!--              <p>{{ apiRequest.controls['name'].valid | json}}</p>-->
+            <!--              <p>{{ apiRequest.controls['name'].valid | json}}</p>-->
 
 
-            </div>
+          </div>
 
 
         </div>
@@ -77,7 +77,7 @@
     </div>
     <div>
 
-      <button type="submit" [disabled]="!apiRequest.valid">Submit</button>
+      <button type="submit" (click)="onSubmit()" [disabled]="!apiRequest.valid">Submit</button>
     </div>
   </form>
 </div>

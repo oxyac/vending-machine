@@ -58,137 +58,116 @@ In order to take use of this vending machine, it is necessary to pass the **seri
 }
 ```
 
-Example response
+Response
 
 
 ```
 {
-	"welcomeMessage": "Here is a description of all available routes",
+	{
+	"welcomeMessage": "Please provide the serial number in all future requests",
 	"availableRoutes": {
-		"/selection&row={B}&col={2}": "Returns item info",
-		"/purchase&row={B}&col={2}": "Make a purchase with deposited money",
-		"/getStock": "Return all item info",
+		"/selection&row={B}&col={2}&machine_id={uuid}": "Returns item info",
+		"/getStock?machine_id={uuid}": "Return all item info",
+		"/deposit&amount={225}&machine_id={uuid}": "Deposit coins into machine",
 		"/loadStock": "Load and parse JSON containing new products",
-		"/deposit&amount={225}": "Deposit coins into machine"
+		"/purchase&row={B}&col={2}&machine_id={uuid}": "Make a purchase with deposited money"
 	},
-	"stock": {
-		"id": "2c67aa3b-7020-46ec-a6d3-bb1d92f59636",
-		"config": {
-			"id": 1,
-			"rows": "4",
-			"columns": 8
+	"serialNumber": "ba87ccf9-7f38-4b5f-9efc-e1a34de7e68c",
+	"items": [
+		{
+			"name": "Snickers",
+			"amount": 10,
+			"price": 135,
+			"row": "A",
+			"col": 1
 		},
-		"items": [
-			{
-				"name": "Snickers",
-				"amount": 10,
-				"price": 135,
-				"row": "A",
-				"col": 1
-			},
-			{
-				"name": "Hersheys",
-				"amount": 10,
-				"price": 225,
-				"row": "B",
-				"col": 1
-			},
-			{
-				"name": "Hersheys Almond",
-				"amount": 10,
-				"price": 180,
-				"row": "C",
-				"col": 1
-			},
-			{
-				"name": "Hersheys Special Dark",
-				"amount": 10,
-				"price": 175,
-				"row": "D",
-				"col": 1
-			},
-			{
-				"name": "Reese's",
-				"amount": 10,
-				"price": 105,
-				"row": "A",
-				"col": 2
-			},
-			{
-				"name": "Nutrageous",
-				"amount": 10,
-				"price": 130,
-				"row": "B",
-				"col": 2
-			},
-			{
-				"name": "Baby Ruth",
-				"amount": 10,
-				"price": 250,
-				"row": "C",
-				"col": 2
-			},
-			{
-				"name": "Milky Way",
-				"amount": 10,
-				"price": 100,
-				"row": "D",
-				"col": 2
-			},
-			{
-				"name": "M&M",
-				"amount": 10,
-				"price": 125,
-				"row": "A",
-				"col": 3
-			}
-		],
-		"vendingMachine": {
-			"id": "b005c6db-a0db-4843-a5b7-f792db2ef14b",
-			"stock": null,
-			"depositedAmount": 0,
-			"transactionInProgress": true
+		{
+			"name": "Hersheys",
+			"amount": 10,
+			"price": 225,
+			"row": "B",
+			"col": 1
+		},
+		{
+			"name": "Hersheys Almond",
+			"amount": 10,
+			"price": 180,
+			"row": "C",
+			"col": 1
+		},
+		{
+			"name": "Hersheys Special Dark",
+			"amount": 10,
+			"price": 175,
+			"row": "D",
+			"col": 1
+		},
+		{
+			"name": "Reese's",
+			"amount": 10,
+			"price": 105,
+			"row": "A",
+			"col": 2
+		},
+		{
+			"name": "Nutrageous",
+			"amount": 10,
+			"price": 130,
+			"row": "B",
+			"col": 2
+		},
+		{
+			"name": "Baby Ruth",
+			"amount": 10,
+			"price": 250,
+			"row": "C",
+			"col": 2
+		},
+		{
+			"name": "Milky Way",
+			"amount": 10,
+			"price": 100,
+			"row": "D",
+			"col": 2
+		},
+		{
+			"name": "M&M",
+			"amount": 10,
+			"price": 125,
+			"row": "A",
+			"col": 3
 		}
-	},
-	"serialNumber": "b005c6db-a0db-4843-a5b7-f792db2ef14b"
+	]
 }
 ```
 
 
 #### REQUIRED STEPS TO DEPLOY LOCALLY:
 
+Spring Boot:
 
+```
 
-#### DEPLOY DATABASE
+git clone
 
-- Fetch image
+cd ./vending-machine/docker
 
-> docker container run -d --name=pg -p 5433:5432 --user $(id -u):$(id -g) -e POSTGRES_PASSWORD=password -e PGDATA=/pgdata -v /home/og/Projects/java/vending-machine/pgdata:/pgdata postgres:latest
+cp docker-compose.override-sample.yml docker-compose.override.yml
 
-- Access the container:
+docker-compose up
 
-> docker exec -it pg bash
+```
 
-> su postgres && psql
+Angular:
 
+```
 
-- Clone the project locally 
+cd ./vending-machine/src/main/frontend
 
-> git clone https://github.com/oxyac/vending-machine.git
+npm install
 
-> cd ./vending-machine
+ng s
 
-- Generate gradle wrapper
-
-gradle wrapper --gradle-version 6.0.1
-
-- Build
-
-> ./gradlew build
-
-- Run 
-
-> ./gradlew bootRun 
-
+```
 
 

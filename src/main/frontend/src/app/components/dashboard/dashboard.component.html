@@ -3,29 +3,28 @@
     <p>Selected: </p>
   </div>
   <div class="row border">
-    <div class="col-md-6 text-center" >
+    <div class="col-md-6 text-center">
       <span class="border border-primary rounded" style="padding: 0 30px  0 30px">
         A2
       </span>
     </div>
-    <div class="col-md-6 text-center">
-        <span class="border border-primary rounded" style="padding: 0 30px  0 30px">
-        $0.00
-      </span>
+    <div class="col-md-6 text-center" *ngIf="(vmService.machineState$ | async) as vendingMachine">
+      <span class="border border-primary rounded"
+            style="padding: 0 30px  0 30px">{{ vendingMachine.deposited / 100 | currency }}</span>
     </div>
   </div>
   <div>
     <p>Insert Coin: </p>
   </div>
   <div class="row">
-    <div class="col-sm-4 text-center"  >
-      <img src="../../../assets/euro_010.png" alt="..." class="rounded-circle">
+    <div class="col-sm-4 text-center">
+      <img (click)="deposit(10)" src="../../../assets/euro_010.png" alt="..." class="rounded-circle">
     </div>
     <div class="col-sm-4 text-center">
-      <img src="../../../assets/euro_050.png" alt="..." class="rounded-circle">
+      <img (click)="deposit(50)" src="../../../assets/euro_050.png" alt="..." class="rounded-circle">
     </div>
     <div class="col-sm-4 text-center">
-      <img src="../../../assets/euro_100.png" alt="..." class="rounded-circle">
+      <img (click)="deposit(100)" src="../../../assets/euro_100.png" alt="..." class="rounded-circle">
     </div>
   </div>
 </div>

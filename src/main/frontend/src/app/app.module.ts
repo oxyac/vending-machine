@@ -13,6 +13,7 @@ import { RouterModule } from '@angular/router';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import { HeaderComponent } from './components/header/header.component';
 import { AppRoutingModule } from './app-routing.module';
+import { CurrencyMaskModule } from 'ng2-currency-mask';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { AppRoutingModule } from './app-routing.module';
     HttpClientModule,
     NgbModule,
     ReactiveFormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    CurrencyMaskModule
   ],
   providers: [],
   bootstrap: [AppComponent]
